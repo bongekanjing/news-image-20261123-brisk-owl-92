@@ -9,8 +9,8 @@ LEAD = {
     "kicker": "MARKETS",
     "lines": ["Nvidia takes back", "the chief who left it"],
     "body": [
-        "Directors voted unanimously to reinstate Jensen Huang as chief",
-        "executive and board member, less than two weeks after he quit.",
+        "Directors voted unanimously to reinstate Jensen Huang as chief executive "
+        "and board member, less than two weeks after he quit.",
     ],
     "figure": "A THIRD",
     "figure_note": "added to Nvidia's value in a single day",
@@ -36,10 +36,10 @@ CARDS = [
 ]
 
 STRIP = [
-    ("AFRICA", "Mourners' boat sinks in Nigeria, killing 24 in Bayelsa State"),
-    ("M. EAST", "Drone attack sinks a Russian warship at Benghazi port, Libya"),
-    ("ASIA", "South Korea's education minister quits over an exam scandal"),
-    ("EUROPE", "Canary Islands set a record for migrant arrivals from Africa"),
+    ("AFRICA", "boat", "Mourners' boat sinks in Nigeria, killing 24 in Bayelsa State", "REPORTED"),
+    ("M. EAST", "ship", "Drone attack sinks a Russian warship at Benghazi port, Libya", "REPORTED"),
+    ("ASIA", "exam", "South Korea's education minister quits over an exam scandal", "CONFIRMED"),
+    ("EUROPE", "crossing", "Canary Islands set a record for migrant arrivals from Africa", "REPORTED"),
 ]
 
 FOOT = "Reported 23 November 2026"

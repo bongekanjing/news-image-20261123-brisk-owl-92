@@ -62,23 +62,26 @@ def globe(d, box, tint):
 
 
 def boat(d, box, tint):
-    """A small boat heeling under a wave."""
+    """A boat heeling over, its bow already under the water."""
     x0, y0, x1, y1 = box
     w, h = x1 - x0, y1 - y0
-    hull = [(x0 + w * 0.10, y0 + h * 0.56), (x1 - w * 0.06, y0 + h * 0.52),
-            (x1 - w * 0.20, y0 + h * 0.74), (x0 + w * 0.26, y0 + h * 0.76)]
-    d.polygon(hull, fill=tint)
-    d.line([x0 + w * 0.16, y0 + h * 0.56, x1 - w * 0.12, y0 + h * 0.53],
-           fill=INK, width=max(2, int(h * 0.03)))
-    d.line([x0 + w * 0.40, y0 + h * 0.56, x0 + w * 0.44, y0 + h * 0.20],
-           fill=INK, width=max(3, int(w * 0.025)))
-    # figures in the boat
+    waterline = y0 + h * 0.64
+    # a hull tilted so the bow goes under: the deck line runs down into the water
+    hull = [(x0 + w * 0.08, y0 + h * 0.50), (x1 - w * 0.10, y0 + h * 0.70),
+            (x1 - w * 0.24, y0 + h * 0.84), (x0 + w * 0.22, y0 + h * 0.70)]
+    d.polygon(hull, fill=INK)
+    # the mast leans the same way the hull does
+    d.line([x0 + w * 0.34, y0 + h * 0.56, x0 + w * 0.50, y0 + h * 0.16],
+           fill=INK, width=max(3, int(w * 0.028)))
+    # figures crowd the high (stern) end, away from the water
     for i in range(3):
-        fx = x0 + w * (0.44 + i * 0.12)
-        _ell(d, [fx - w * 0.028, y0 + h * 0.34, fx + w * 0.028, y0 + h * 0.44], INK)
-    # wave crests
+        fx = x0 + w * (0.30 + i * 0.10)
+        fy = y0 + h * (0.30 + i * 0.045)
+        _ell(d, [fx - w * 0.030, fy, fx + w * 0.030, fy + h * 0.10], INK)
+    # the waterline cuts across the hull, so part of the boat is submerged
+    d.line([x0, waterline, x1, waterline], fill=tint, width=max(3, int(h * 0.045)))
     for row in range(2):
-        yy = y1 - h * (0.24 - row * 0.14)
+        yy = y1 - h * (0.22 - row * 0.13)
         pts = []
         for i in range(21):
             fx = x0 + (x1 - x0) * i / 20
@@ -87,23 +90,28 @@ def boat(d, box, tint):
 
 
 def ship(d, box, tint):
-    """A warship listing, with a smoke column."""
+    """A warship listing hard, holed at the waterline, with a smoke column."""
     x0, y0, x1, y1 = box
     w, h = x1 - x0, y1 - y0
-    hull = [(x0 + w * 0.14, y0 + h * 0.66), (x1 - w * 0.10, y0 + h * 0.58),
-            (x1 - w * 0.16, y0 + h * 0.76), (x0 + w * 0.22, y0 + h * 0.80)]
+    waterline = y0 + h * 0.80
+    # the hull is rotated: the bow rides up, the stern is going under
+    hull = [(x0 + w * 0.12, y0 + h * 0.62), (x1 - w * 0.10, y0 + h * 0.76),
+            (x1 - w * 0.18, y0 + h * 0.92), (x0 + w * 0.22, y0 + h * 0.86)]
     d.polygon(hull, fill=INK)
-    d.rectangle([x0 + w * 0.34, y0 + h * 0.42, x0 + w * 0.58, y0 + h * 0.66], fill=INK)
-    d.line([x0 + w * 0.50, y0 + h * 0.42, x0 + w * 0.50, y0 + h * 0.22],
+    d.rectangle([x0 + w * 0.36, y0 + h * 0.44, x0 + w * 0.60, y0 + h * 0.68], fill=INK)
+    d.line([x0 + w * 0.52, y0 + h * 0.44, x0 + w * 0.48, y0 + h * 0.22],
            fill=INK, width=max(2, int(w * 0.02)))
-    # smoke
+    # the breach: a notch blown out of the hull at the waterline
+    d.polygon([(x1 - w * 0.34, waterline - h * 0.10), (x1 - w * 0.20, waterline - h * 0.02),
+               (x1 - w * 0.30, waterline + h * 0.10)], fill=PAPER)
+    # smoke leans off the stern, so the plume reads as damage not exhaust
     for i in range(4):
-        r = w * (0.055 + i * 0.012)
-        cx = x0 + w * (0.52 + i * 0.085)
-        cy = y0 + h * (0.30 - i * 0.062)
+        r = w * (0.055 + i * 0.014)
+        cx = x0 + w * (0.50 - i * 0.075)
+        cy = y0 + h * (0.28 - i * 0.058)
         _ell(d, [cx - r, cy - r, cx + r, cy + r], tint)
-    # water
-    d.line([x0 + w * 0.04, y0 + h * 0.82, x1 - w * 0.04, y0 + h * 0.82], fill=tint, width=3)
+    # the waterline cuts the hull
+    d.line([x0 + w * 0.02, waterline, x1 - w * 0.02, waterline], fill=tint, width=3)
 
 
 def exam(d, box, tint):
@@ -119,16 +127,28 @@ def exam(d, box, tint):
 
 
 def crossing(d, box, tint):
-    """A small boat against a long coastline."""
+    """A packed boat low in the water, seen against a distant shore."""
     x0, y0, x1, y1 = box
     w, h = x1 - x0, y1 - y0
-    d.ellipse([x0, y1 - h * 0.30, x1, y1 + h * 0.30], fill=tint)
-    d.line([x0, y0 + h * 0.42, x1, y0 + h * 0.34], fill=INK, width=max(3, int(h * 0.035)))
-    # little boat
-    bx0 = x0 + w * 0.44
-    d.polygon([(bx0, y0 + h * 0.60), (bx0 + w * 0.20, y0 + h * 0.58),
-               (bx0 + w * 0.17, y0 + h * 0.70), (bx0 + w * 0.03, y0 + h * 0.71)], fill=INK)
-    d.line([bx0 + w * 0.09, y0 + h * 0.60, bx0 + w * 0.10, y0 + h * 0.46], fill=INK, width=3)
+    water = y0 + h * 0.66
+    # the far shore: a low, uneven horizon well above the waterline
+    d.line([x0, y0 + h * 0.26, x0 + w * 0.30, y0 + h * 0.20], fill=tint,
+           width=max(3, int(h * 0.05)))
+    d.line([x0 + w * 0.30, y0 + h * 0.20, x1, y0 + h * 0.30], fill=tint,
+           width=max(3, int(h * 0.05)))
+    # the open water
+    d.line([x0, water, x1, water], fill=tint, width=max(3, int(h * 0.05)))
+    # a low, overladen hull sitting *in* the water, not floating above it
+    hull = [(x0 + w * 0.16, water - h * 0.10), (x1 - w * 0.14, water - h * 0.13),
+            (x1 - w * 0.22, water + h * 0.08), (x0 + w * 0.24, water + h * 0.08)]
+    d.polygon(hull, fill=INK)
+    # heads crowded along the gunwale
+    for i in range(5):
+        fx = x0 + w * (0.28 + i * 0.11)
+        _ell(d, [fx - w * 0.035, water - h * 0.27, fx + w * 0.035, water - h * 0.17], INK)
+    # one raised arm, so it reads as people, not cargo
+    d.line([x0 + w * 0.60, water - h * 0.28, x0 + w * 0.62, water - h * 0.44],
+           fill=INK, width=max(2, int(h * 0.04)))
 
 
 ART = {"capitol": capitol, "globe": globe, "boat": boat,

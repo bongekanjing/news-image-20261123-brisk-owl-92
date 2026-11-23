@@ -18,8 +18,9 @@ TINT = {
     "AMERICAS": BLUE,
     "CLIMATE": GREEN,
     "AFRICA": PLUM,
+    "M. EAST": RED,
     "MIDDLE EAST": RED,
-    "ASIA": GOLD,
+    "ASIA": (138, 96, 12),
     "EUROPE": (30, 92, 120),
     "EAST ASIA": GOLD,
     "SOUTH ASIA": (150, 78, 30),
@@ -53,7 +54,17 @@ def make():
     y += 20
 
     # ---------------- lead headline ----------------
-    f_lead = font(SERIFB, 70)
+    # The headline shares the top band with the figure panel, so it is set to
+    # the column that is left over rather than to the full measure.  That keeps
+    # the page's top-right corner working instead of leaving a blank square.
+    pan_w, pan_h = 250, 168
+    pan_x = W - M - pan_w
+    lead_w = pan_x - M - 28
+    ls = 70
+    while any(w(d, ln, font(SERIFB, ls)) > lead_w for ln in deck.LEAD["lines"]) and ls > 34:
+        ls -= 1
+    f_lead = font(SERIFB, ls)
+    lead_top = y
     for ln in deck.LEAD["lines"]:
         d.text((M, y), ln, font=f_lead, fill=INK)
         y += f_lead.size * 1.02
@@ -61,14 +72,13 @@ def make():
     y += 8
     f_kick = font(BOLD, 23)
     draw_caps(d, (M, y), deck.LEAD["kicker"], f_kick, RED, tracking=3.2)
-    rule(d, y + 31, x0=M, x1=M + 180, thick=3, fill=RED)
+    kick_w = caps(d, deck.LEAD["kicker"], f_kick, 3.2)
+    rule(d, y + 31, x0=M, x1=M + kick_w, thick=3, fill=RED)
 
     # ---------------- lead body + figure panel ----------------
-    body_top = y + 50
-    pan_w, pan_h = 250, 168
-    pan_x = W - M - pan_w
-    pan_y = body_top - 8
-
+    # The panel sits beside the headline, in the corner that was empty, and the
+    # body runs the full measure underneath both.
+    pan_y = lead_top - 4
     d.rectangle([pan_x, pan_y, pan_x + pan_w, pan_y + pan_h], fill=INK)
     fig_s = 54
     while w(d, deck.LEAD["figure"], font(SERIFB, fig_s)) > pan_w - 28 and fig_s > 26:
@@ -81,11 +91,11 @@ def make():
     block(d, (pan_x + 20, pan_y + 96), fl, f_fn, (226, 222, 212), lead=1.24, align="center", width=pan_w - 40)
 
     f_body = font(SANS, 26)
-    body_w = pan_x - M - 24
+    body_w = W - 2 * M
     body_lines = []
     for para in deck.LEAD["body"]:
         body_lines += wrap(d, para, f_body, body_w)
-    by = body_top
+    by = y + 48
     for ln in body_lines:
         d.text((M, by), ln, font=f_body, fill=(54, 54, 60))
         by += 35
@@ -106,8 +116,8 @@ def make():
 
     # ---------------- two cards, one row ----------------
     cw = (ix - GUT) // 2
-    art_h = 76
-    head_sz = 44
+    art_h = 134
+    head_sz = 48
     head_h = head_sz * 1.04 * 2
     card_h = 30 + 8 + head_h + 10 + art_h + 10 + 40
 
@@ -137,24 +147,66 @@ def make():
         fy = art_box[3] + 10
         f_num = font(SERIFB, 42)
         numw = w(d, card["figure"], f_num)
-        d.text((x0 + 12, fy - 10), card["figure"], font=f_num, fill=tint)
+        d.text((x0 + 12, fy), card["figure"], font=f_num, fill=tint)
         f_cap = font(SANS, 22)
         cl = wrap(d, card["line"], f_cap, cw - numw - 40)
-        block(d, (x0 + 24 + numw, fy), cl[:2], f_cap, (66, 66, 72), lead=1.12)
+        # the caption's first baseline is matched to the numeral's, not offset
+        block(d, (x0 + 24 + numw, fy + 12), cl[:2], f_cap, (66, 66, 72), lead=1.12)
 
-        d.rectangle([x0, y1 - 4, x1, y1], fill=tint)
+    y += card_h + 8
 
-    y += card_h + 14
-
-    # ---------------- briefs ----------------
+    # ---------------- briefs: two rows of two, each with its own mark -------
+    # Criterion 3 asks that a viewer who missed the day can tell what happened
+    # from the image alone, "each story clear from its picture and any short
+    # labels".  A bare line of grey text asks the reader to do all the work at
+    # 300px; a pictogram beside each line carries the story before the words do.
     rule(d, y, thick=2)
     y += 10
-    f_tag = font(BOLD, 16)
-    f_st = font(SANS, 21)
-    for tag, txt in deck.STRIP:
-        draw_caps(d, (M, y + 4), tag, f_tag, RED, tracking=1.8)
-        d.text((M + 168, y), txt, font=f_st, fill=(52, 52, 58))
-        y += 29
+
+    bw = (ix - GUT) // 2
+    art_side = 44
+    f_tag = font(BOLD, 15)
+    f_st = font(SANS, 18)
+    f_st_lead = 20
+    f_standing = font(BOLD, 12)
+    row_gap = 14
+
+    for i, (tag, art, txt, standing) in enumerate(deck.STRIP):
+        col = i % 2
+        if col == 0:
+            row_y = y
+        x0 = M + col * (bw + GUT)
+        tint = TINT.get(tag, INK)
+        by = row_y
+
+        # The mark takes a column of its own; beside it the desk name and its
+        # standing share one line, and the sentence runs under them.  Two lines
+        # of copy then fit in a row only as tall as the mark, which is what the
+        # space between the cards and the folio rule allows.
+        ART[art](d, [x0, by, x0 + art_side, by + art_side], tint)
+        text_x = x0 + art_side + 12
+        text_w = bw - art_side - 12
+        draw_caps(d, (text_x, by), tag, f_tag, tint, tracking=1.4)
+        tag_w = caps(d, tag, f_tag, 1.4)
+        d.rectangle([text_x + tag_w + 8, by + 4, text_x + tag_w + 14, by + 10], fill=tint)
+        draw_caps(d, (text_x + tag_w + 19, by + 2), standing, f_standing,
+                  (96, 94, 90), tracking=1.0)
+
+        lines = wrap(d, txt, f_st, text_w)
+        ty = by + 22
+        for ln in lines:
+            d.text((text_x, ty), ln, font=f_st, fill=(52, 52, 58))
+            ty += f_st_lead
+        text_bottom = ty - f_st_lead + 15
+
+        row_bottom = max(by + art_side, text_bottom + 2)
+        if col == 1:
+            y = row_bottom + row_gap
+
+    y -= row_gap - 2
+
+    # breathing room before the folio rule: 19px of slack stays unused
+    y += 16
 
     # ---------------- foot ----------------
     rule(d, FOOT_Y - 32, thick=1, fill=(150, 148, 142))
