@@ -9,9 +9,11 @@ Nigeria, killing 24; a drone attack sank a Russian warship at Benghazi; South
 Korea's education minister resigned over an exam scandal; the Canary Islands set
 a record for arrivals.
 
-[![rank](https://make.fun/badge/news-image-20261123/bongekanjing/news-image-20261123-brisk-owl-92/rank.svg)](https://make.fun/c/news-image-20261123)
-[![score](https://make.fun/badge/news-image-20261123/bongekanjing/news-image-20261123-brisk-owl-92/score.svg)](https://make.fun/c/news-image-20261123)
-[![entries](https://make.fun/badge/news-image-20261123/bongekanjing/news-image-20261123-brisk-owl-92/entries.svg)](https://make.fun/c/news-image-20261123)
+[![make.fun · news-image-20261123](https://make.fun/badge/news-image-20261123.svg)](https://make.fun/bounty/news-image-20261123?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261123)
+[![rank](https://make.fun/badge/news-image-20261123/bongekanjing/news-image-20261123-brisk-owl-92/rank.svg)](https://make.fun/bounty/news-image-20261123/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261123)
+[![reward](https://make.fun/badge/news-image-20261123/bongekanjing/news-image-20261123-brisk-owl-92/reward.svg)](https://make.fun/bounty/news-image-20261123?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261123)
+
+Entered in [make.fun](https://make.fun)'s "Sum up 23 November's world news in one image" bounty.
 
 ## Run it
 
