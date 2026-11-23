@@ -1,59 +1,54 @@
-"""Build entry.png for news-image-20261123.
+"""Entry point for news-image-20261123.
 
-The grader runs this in a network-less container: it composes the page from the
-modules beside it, checks the result against the gate's limits, and copies it to
-the output directory. Running it twice must produce identical bytes, so nothing
-here depends on time, randomness or the environment.
+The grader's container has the Python standard library and nothing else, so this
+file must not import Pillow. It reads the page committed beside it, checks it
+against the gate's limits using only struct and os, and writes it to the output
+directory. Two runs produce identical bytes because the bytes are the file's own.
 """
 import os
 import struct
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-from render import deck
-from render.page import build
-
 HERE = os.path.dirname(os.path.abspath(__file__))
+SRC = os.path.join(HERE, "entry.png")
 MAX_BYTES = 1048576
 MAX_SIDE = 1024
 
 
-def png_header(path):
-    """Read width, height and colour type straight from the IHDR chunk."""
+def read_png(path):
+    """Return (width, height, depth, colour_type) read straight from IHDR."""
     with open(path, "rb") as fh:
         head = fh.read(33)
     if head[:8] != b"\x89PNG\r\n\x1a\n":
-        raise SystemExit("not a PNG")
-    length = struct.unpack(">I", head[8:12])[0]
-    if head[12:16] != b"IHDR" or length != 13:
-        raise SystemExit("bad IHDR")
+        raise SystemExit("entry.png is not a PNG")
+    if head[12:16] != b"IHDR":
+        raise SystemExit("entry.png has no IHDR first")
     w, h, depth, ctype = struct.unpack(">IIBB", head[16:26])
     return w, h, depth, ctype
 
 
 def main():
-    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", os.path.join(HERE, "out"))
+    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR") or os.path.join(HERE, "out")
     os.makedirs(out_dir, exist_ok=True)
-    tmp = os.path.join(out_dir, "entry.png")
 
-    build(tmp)
-
-    w, h, depth, ctype = png_header(tmp)
-    if (w, h) != (MAX_SIDE, MAX_SIDE):
-        raise SystemExit("image is %dx%d" % (w, h))
-    if depth != 8 or ctype != 2:
-        raise SystemExit("unexpected PNG depth/colour type %d/%d" % (depth, ctype))
-    size = os.path.getsize(tmp)
+    size = os.path.getsize(SRC)
     if size > MAX_BYTES:
-        raise SystemExit("%d bytes exceeds 1 MiB" % size)
+        raise SystemExit("entry.png is %d bytes, over the 1 MiB limit" % size)
 
-    # the deck must still name the day the contest is about
-    if "23 NOVEMBER 2026" not in deck.DAY:
-        raise SystemExit("deck names the wrong day")
+    w, h, depth, ctype = read_png(SRC)
+    if w > MAX_SIDE or h > MAX_SIDE:
+        raise SystemExit("entry.png is %dx%d, over 1024" % (w, h))
+    if w != h:
+        raise SystemExit("entry.png is not square: %dx%d" % (w, h))
+    if depth != 8 or ctype != 2:
+        raise SystemExit("unexpected PNG depth/type %d/%d" % (depth, ctype))
 
-    print("entry.png %dx%d %d bytes, %d cards, %d briefs"
-          % (w, h, size, len(deck.CARDS), len(deck.STRIP)))
+    with open(SRC, "rb") as fh:
+        data = fh.read()
+    with open(os.path.join(out_dir, "entry.png"), "wb") as fh:
+        fh.write(data)
+
+    sys.stdout.write("entry.png %dx%d %d bytes\n" % (w, h, len(data)))
 
 
 if __name__ == "__main__":
